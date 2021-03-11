@@ -42,6 +42,11 @@
 
 #include "mali_kbase.h"
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 11, 0)
+#include <linux/module.h>
+#include <linux/fdtable.h>
+#endif
+
 /**
  * struct kbase_sync_fence_info - Information about a fence
  * @fence: Pointer to fence (type is void*, as underlaying struct can differ)
@@ -161,10 +166,12 @@ void kbase_sync_fence_out_remove(struct kbase_jd_atom *katom);
  */
 static inline void kbase_sync_fence_close_fd(int fd)
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 17, 0)
+	sys_close(fd);
+#elif LINUX_VERSION_CODE < KERNEL_VERSION(5, 11, 0)
 	ksys_close(fd);
 #else
-	sys_close(fd);
+	close_fd(fd);
 #endif
 }
 
