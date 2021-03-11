@@ -1257,7 +1257,11 @@ static struct kbase_cpu_mapping *kbasep_find_enclosing_cpu_mapping(
 	unsigned long map_start;
 	size_t map_size;
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 8, 0))
 	lockdep_assert_held(&current->mm->mmap_sem);
+#else
+	mmap_assert_locked(current->mm);
+#endif
 
 	if ((uintptr_t) uaddr + size < (uintptr_t) uaddr) /* overflow check */
 		return NULL;
